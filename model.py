@@ -76,6 +76,10 @@ class IndexList:
                         '^CRY':	'CRB INDEX'
                         }
 
+    def list_indices(self):
+        return self.indices
+
+
     def initialise_indices(self):
         for symbol in self.index_list:
             print(symbol)
@@ -112,7 +116,16 @@ class Index:
     def define_quotations(self, quotations):
         self.quotation_df = quotations
 
+    def __str__(self):
+        print("")
+        print("-----" + self.name + "-----")
+        print("from: " + self.start_date + " to: " + self.last_date)
+        print(self.quotation_df)
+        print("")
 
 
 list = IndexList()
 list.initialise_indices()
+indices = list.list_indices()
+for i in indices:
+    print(i)
