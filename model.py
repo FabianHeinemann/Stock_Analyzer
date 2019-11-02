@@ -1,5 +1,4 @@
 # from database import db
-import datetime
 import yaml
 # from sqlalchemy import _or
 import pandas as pd
@@ -16,12 +15,14 @@ class IndexList:
             end_date (datetime.date): end_date to query
 
     """
-    START_DATE = datetime.datetime(2019, 10, 28)
-    END_DATE = datetime.datetime(2019, 10, 31)
 
-    def __init__(self, yaml_file):
+    def __init__(self, yaml_file, start_date, end_date):
         # csv to store stock data (optional)
         self.csv_file = "stock_data.csv"
+
+        #
+        self.start_date = start_date
+        self.end_date = end_date
 
         # Index data list
         self.indices = []
@@ -77,8 +78,8 @@ class IndexList:
        """
         return StooqDailyReader(
             symbols=symbol,
-            start=self.START_DATE,
-            end=self.END_DATE,
+            start=self.start_date,
+            end=self.end_date,
             chunksize=25,
             retry_count=3,
             pause=0.1,
