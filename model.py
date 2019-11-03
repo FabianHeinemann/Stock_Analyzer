@@ -12,11 +12,11 @@ import numpy as np
 class IndexList:
     """ Class to manage lists of indexes
 
-        Parameters:
-            yaml_file (string): yaml file path containing indexes
-            start_date (datetime.date): start_date to query
-            end_date (datetime.date): end_date to query
-            proxies:  proxy dict. Default: {} (no proxy)
+    Parameters:
+        yaml_file (string): yaml file path containing indexes
+        start_date (datetime.date): start_date to query
+        end_date (datetime.date): end_date to query
+        proxies:  proxy dict. Default: {} (no proxy)
 
     """
 
@@ -60,7 +60,7 @@ class IndexList:
 
         Returns:
             (nothing):    self.indexes is populated
-       """
+        """
         if source == "web":
             # Read from web
             for symbol in self.index_dict:
@@ -123,12 +123,12 @@ class IndexList:
 
 class Index:
     """ Class to store index data
-        Parameters:
-            name (string): name of index
-            symbol (string): unique symbol
-            start_date (datetime.date): start date of index
-            last_date (datetime.date): last available date of index
-       """
+    Parameters:
+        name (string): name of index
+        symbol (string): unique symbol
+        start_date (datetime.date): start date of index
+        last_date (datetime.date): last available date of index
+    """
     def __init__(self, name, symbol, start_date, last_date):
         self.name = name
         self.symbol = symbol
@@ -138,10 +138,11 @@ class Index:
 
     def set_quotations(self, quotations):
         """ Set quotation data
-            Parameter:
-                quotations (pandas dataframe): dataframe containing quotations data
-           """
+        Parameter:
+            quotations (pandas dataframe): dataframe containing quotations data
+        """
         self.quotation_df = quotations
 
     def __str__(self):
+        """ String serialization method """
         return("----- + %s + -----\nfrom: %s to: %s" %  (self.name, self.start_date, self.last_date))
