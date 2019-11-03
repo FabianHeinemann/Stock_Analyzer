@@ -122,6 +122,7 @@ class IndexList:
             # read from database
             # to do
             pass
+        
         elif source == "test":
             # generate empty test data
             for symbol in self.index_dict:
