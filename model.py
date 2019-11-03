@@ -1,4 +1,3 @@
-# from database import db
 import yaml
 import sqlalchemy as db
 import pandas as pd
@@ -57,7 +56,7 @@ class IndexList:
         return self.indices
 
     def read_index_list_from_yaml(self):
-        """ Reads index list from yaml. Will populate self.index list.
+        """ Reads index list from yaml and returns result as dictionary.
 
         returns:
             index_dict: Dictionary of index_id - index_name pairs
