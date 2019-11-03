@@ -2,11 +2,16 @@ from model import *
 import datetime
 
 def main():
-    list = IndexList("stocks.yaml", datetime.date(2019, 10, 28), datetime.date(2019, 10, 29))
-    list.initialize_indexes(source="web")
-    indices = list.list_indices()
-    for i in indices:
+    # Create IndexList object
+    list = IndexList("stocks.yaml", datetime.date(2019, 10, 22), datetime.date(2019, 10, 29))
+
+    # Initialize the index list
+    list.initialize_indexes(source="test")
+
+    # Print output of all available data
+    for i in list.list_indices():
         print(i)
+        print(i.quotation_df)
 
 
 if __name__ == "__main__":
