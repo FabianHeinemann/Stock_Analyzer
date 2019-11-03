@@ -5,6 +5,7 @@ import pandas_datareader as pdr
 import pandas_datareader.data as web
 from pandas import DataFrame
 from pandas_datareader.stooq import StooqDailyReader
+import yfinance as yf
 import requests
 import datetime
 import numpy as np
@@ -81,6 +82,7 @@ class IndexList:
                     "web": read from web sources (default)
                     "db":  read from database
                     "test": generate empty test data
+                    "yahoo": read from yahoo
 
         Returns:
             (nothing):    self.indexes is populated
@@ -93,9 +95,28 @@ class IndexList:
                 stooq_data = self.get_stooq_data(symbol)
                 if not stooq_data.empty:
                     # Create new index object
-                    new_index = Index(self.index_dict.get(symbol), symbol, stooq_data.index[-1], stooq_data.index[0])
+                    new_index = Index(self.index_dict.get(symbol),
+                                      symbol, stooq_data.index[-1], 
+                                      stooq_data.index[0])
                     # Add dataframe with time series data
                     new_index.set_quotations(stooq_data)
+                    self.indices.append(new_index)
+                else:
+                    print("Read error.")
+        elif source == "yahoo":
+            # Read from yahoo
+            print("Read from yahoo")
+            for symbol in self.index_dict:
+                print(symbol)
+                yf.pdr_override()
+                yahoo_data = self.get_yahoo_data(symbol)
+                if not yahoo_data.empty:
+                    # Create new index object
+                    new_index = Index(self.index_dict.get(symbol),
+                                      symbol, yahoo_data.index[-1], 
+                                      yahoo_data.index[0])
+                    # Add dataframe with time series data
+                    new_index.set_quotations(yahoo_data)
                     self.indices.append(new_index)
                 else:
                     print("Read error.")
@@ -195,6 +216,31 @@ class IndexList:
             # Add dataframe with time series data
             new_index.set_quotations(indexes_dataframe[indexes_dataframe["Name"] == name])
             self.indices.append(new_index)
+
+    def get_yahoo_data(self, symbol):
+        """ Returns yahooestock data for a given symbol
+            https://www.yahoo.com
+            Times are defined by self.start_date and self.end_date
+
+        Parameters:
+            symbol (str): Symbol (e.g. "^SPX" for "S&P 500 - U.S.")
+
+        Returns:
+            Pandas Dataframe: Table of results
+       """
+        return web.get_data_yahoo(
+            tickers=symbol,
+            start=self.start_date,
+            end=self.end_date,
+            chunksize=25,
+            retry_count=3,
+            pause=0.1,
+            session=self.session,
+            adjust_price=False
+        ).read()
+
+
+
 
     def get_stooq_data(self, symbol):
         """ Returns stooq temporal stock data for a given symbol
