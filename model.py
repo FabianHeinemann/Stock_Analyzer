@@ -1,9 +1,10 @@
 # from database import db
 import yaml
-# from sqlalchemy import _or
+import sqlalchemy as db
 import pandas as pd
 import pandas_datareader as pdr
 import pandas_datareader.data as web
+from pandas import DataFrame
 from pandas_datareader.stooq import StooqDailyReader
 import requests
 import datetime
@@ -23,9 +24,13 @@ class IndexList:
 
     def __init__(self, start_date, end_date, proxies=None, yaml_file="stocks.yaml"):
         # csv file name to store stock data (optional)
+        self.csv_file = "stock_data.csv"
+
+        # db connect string to store stock data (optional)
+        self.db_connect_string = 'sqlite:///stock_data.db'
+
         if proxies is None:
             proxies = {}
-        self.csv_file = "stock_data.csv"
 
         # yaml_file to read indexes dict from
         self.yaml_file = yaml_file
@@ -102,27 +107,19 @@ class IndexList:
             # Read csv
             indexes_dataframe = pd.read_csv(self.csv_file, parse_dates=["Date"])
 
-            # Create index dict and index object from data in csv
-            self.index_dict = {}
-            for name in indexes_dataframe["Name"].unique():
-                symbol = indexes_dataframe[indexes_dataframe["Name"] == name]["Symbol"].unique()[0]
-                self.index_dict[symbol] = name
-
-                start_time = min(indexes_dataframe[indexes_dataframe["Name"] == name]["Date"])
-                end_time = max(indexes_dataframe[indexes_dataframe["Name"] == name]["Date"])
-
-                # Create new index object
-                new_index = Index(name, symbol, start_time, end_time)
-
-                # Add dataframe with time series data
-                new_index.set_quotations(indexes_dataframe[indexes_dataframe["Name"] == name])
-                self.indices.append(new_index)
+            # Update indexes from dataframe
+            self.update_indexes_from_dataframe(indexes_dataframe)
 
         elif source == "db":
             # read from database
-            # to do
-            pass
-        
+            print("Read from databse: %s" % (self.db_connect_string))
+
+            indexes_dataframe = pd.read_sql_table('Indexes', self.db_connect_string)  # type: DataFrame
+
+            # Update indexes from dataframe
+            if not indexes_dataframe.empty:
+                self.update_indexes_from_dataframe(indexes_dataframe)
+
         elif source == "test":
             # generate empty test data
             for symbol in self.index_dict:
@@ -154,7 +151,7 @@ class IndexList:
         if target == "csv":
             # Serialize to csv
 
-            # Create a dataframe
+            # Create a dataframe containing all data
             indexes_dataframe = pd.DataFrame()
             for i in self.list_indices():
                 indexes_dataframe = indexes_dataframe.append(i.quotation_df, ignore_index=True)
@@ -164,7 +161,41 @@ class IndexList:
 
         elif target == "db":
             # Serialize to database
-            pass
+
+            # Create a dataframe containing all data
+            indexes_dataframe = pd.DataFrame()
+            for i in self.list_indices():
+                indexes_dataframe = indexes_dataframe.append(i.quotation_df, ignore_index=True)
+
+            # Create database engine object
+            db_engine = db.create_engine(self.db_connect_string)
+
+            # Save to database
+            # To do: Add unique keys (Id-timestamp)
+            indexes_dataframe.to_sql("Indexes", con=db_engine, if_exists="replace")
+
+    def update_indexes_from_dataframe(self, indexes_dataframe):
+        """ Update indexes dict and indexes from dataframe
+        Parameter:
+            indexes_dataframe (Pandas Dataframe): Contains index data
+        Returns:
+            (nothing)
+        """
+        # Create index dict and index object from data in csv
+        self.index_dict = {}
+        for name in indexes_dataframe["Name"].unique():
+            symbol = indexes_dataframe[indexes_dataframe["Name"] == name]["Symbol"].unique()[0]
+            self.index_dict[symbol] = name
+
+            start_time = min(indexes_dataframe[indexes_dataframe["Name"] == name]["Date"])
+            end_time = max(indexes_dataframe[indexes_dataframe["Name"] == name]["Date"])
+
+            # Create new index object
+            new_index = Index(name, symbol, start_time, end_time)
+
+            # Add dataframe with time series data
+            new_index.set_quotations(indexes_dataframe[indexes_dataframe["Name"] == name])
+            self.indices.append(new_index)
 
     def get_stooq_data(self, symbol):
         """ Returns stooq temporal stock data for a given symbol
