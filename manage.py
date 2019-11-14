@@ -1,23 +1,19 @@
 from manager import Manager
-from model import Index
 from model import IndexList
-from database import db
+from database import db_session, db_engine
 from datetime import date
-from sqlalchemy.orm import sessionmaker
 import sqlalchemy as sqlalchemy
 
 
 manager = Manager()
-Session = sessionmaker(bind=db)
-session = Session()
 metadata = sqlalchemy.MetaData()
 
 
 @manager.command
 def initdb(db_type, test=False):
     """ inits the sqlite-databse"""
-    metadata.drop_all(db)
-    metadata.create_all(db)
+    metadata.drop_all(db_engine)
+    metadata.create_all(db_engine)
     index_list = IndexList(date(2019, 10, 22),
                            date(2019, 10, 29))
     if test:
@@ -33,10 +29,10 @@ def initdb(db_type, test=False):
 @manager.command
 def listindex():
     """ lists all saved db indices"""
-    indices = session.query().all()
+    indices = db_session.query().all()
     print(indices)
 
 
 if __name__ == '__main__':
     manager.main()
-    session.close()
+    db_session.close()
