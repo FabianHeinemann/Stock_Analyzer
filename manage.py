@@ -1,38 +1,40 @@
 from manager import Manager
-from model import IndexList
-from database import db_session, db_engine
+from util import IndexList
 from datetime import date
-import sqlalchemy as sqlalchemy
+from model import Index, Quotation
+from database import db_session, db_engine, Base
 
 
 manager = Manager()
-metadata = sqlalchemy.MetaData()
 
+
+@manager.command
+def createdb():
+    """ creates the sqlite-databse"""
+    Base.metadata.drop_all(db_engine)
+    Base.metadata.create_all(db_engine)
 
 @manager.command
 def initdb(db_type, test=False):
     """ inits the sqlite-databse"""
-    metadata.drop_all(db_engine)
-    metadata.create_all(db_engine)
+    from database import db_session, db_engine
     index_list = IndexList(date(2019, 10, 22),
                            date(2019, 10, 29))
     if test:
         index_list.initialize_indexes(source="test")
-        index_list.serialize_indexes(target="db")
+        #index_list.serialize_indexes(target="db")
     else:
         index_list.initialize_indexes(source="test")
-        for index in index_list:
-            # Object Mapping from classes to sqlite via sqlalchemy
-            pass
 
 
 @manager.command
 def listindex():
     """ lists all saved db indices"""
-    indices = db_session.query().all()
+    indices = db_session.query(Index).all()
     print(indices)
 
 
 if __name__ == '__main__':
     manager.main()
+    from database import db_session, db_engine
     db_session.close()
