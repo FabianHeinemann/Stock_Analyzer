@@ -54,6 +54,8 @@ def list_all_datavendors():
 @manager.command
 def list_prices_security(symbol):
     """ lists all saved quotes by symbol"""
+
+    # Get Security object for given symbol
     security = db_session.query(Security).filter_by(symbol=symbol).one()
     if security is not None:
         quotations = db_session.query(Quotation).filter_by(security_id=
@@ -65,14 +67,14 @@ def list_prices_security(symbol):
 
 
 @manager.command
-def update_price(symbol, datavendor="Yahoo"):
+def update_price(symbol, datavendor = "Yahoo"):
     """update prices for one Security
         Default start_date: 2000/01/01"""
     dc.update_quotation(symbol, datavendor)
 
 
 @manager.command
-def update_price_all(datavendor="Yahoo"):
+def update_price_all(datavendor = "Yahoo"):
     """update prices for all securities found in table 'security'
         Default start_date: 2000/01/01"""
     securities = db_session.query(Security).all()
@@ -85,13 +87,14 @@ def show_quotations_symbol(symbol):
     pass
 
 @manager.command
-def plot_symbol(symbol):
-    # Get data for security
+def plot_security(symbol):
+    dc.plot_security(symbol)
 
-    # Generate plot
-
-    # Save png in folder ./plots/
-    pass
+@manager.command
+def plot_all_securities():
+    securities = db_session.query(Security).all()
+    for s in securities:
+        dc.plot_security(s.symbol)
 
 if __name__ == '__main__':
     manager.main()

@@ -10,6 +10,12 @@ import datetime
 import numpy as np
 from database import db_session
 from model import DataVendor, Security, Exchange, Quotation
+import matplotlib.pyplot as plt
+from pandas.plotting import register_matplotlib_converters
+import os
+import errno
+register_matplotlib_converters()
+plt.rcParams.update({'figure.max_open_warning': 0})
 
 
 class DataController:
@@ -42,8 +48,8 @@ class DataController:
             print(row.Name + " " + row.Type + " " + row.Symbol)
             self.add_security(row.Name, row.Type, row.Symbol)
 
-    def addQuotation(self, date, open, high, low, close, adj_close, volume,
-                     created_date, last_updated, datavendor, security):
+    def add_quotation(self, date, open, high, low, close, adj_close, volume,
+                      created_date, last_updated, datavendor, security):
 
         db_session.add(Quotation(date=date, open=open, high=high, low=low,
                        close=close, adj_close=adj_close, volume=volume,
@@ -67,7 +73,7 @@ class DataController:
                 print("begin quotes")
                 for index, quotation in yahoo_data.iterrows():
                     print(quotation)
-                    self.addQuotation(date=index,
+                    self.add_quotation(date=index,
                                        open=quotation["Open"],
                                        high=quotation["High"],
                                        low=quotation["Low"],
@@ -82,6 +88,84 @@ class DataController:
             else:
                 print("Read error.")
 
+    def get_security_quotes_as_dataframe(self, symbol):
+        """ Get a security quotes as a dataframe
+
+        Parameters:
+            symbol (string): Symbol of the security to obtain as dataframe
+                             (e.g. "^SPX" for "S&P 500 - U.S.")
+        Returns:
+            Pandas Dataframe: Table of results (empty on error)
+        """
+
+        # Get security object
+        security = db_session.query(Security).filter_by(symbol=symbol).one()
+
+        # Return object
+        security_df = pd.DataFrame()
+        if security is not None:
+            # Get security data as dataframe
+            quotations = db_session.query(Quotation).filter_by(security_id = security.id).all()
+            return security_df
+
+            date_list = []
+            adj_close_list = []
+            volume_list = []
+            for quotation in quotations:
+                date_list.append(quotation.date)
+                adj_close_list.append(quotation.adj_close)
+                volume_list.append(quotation.volume)
+
+            security_df = pd.DataFrame({"Date" : date_list, "adj_close" : adj_close_list, "Volume" : volume_list})
+
+        return security_df
+
+    def plot_security(self, symbol, savepath = "./plots/"):
+        """ Plot security quotes and save as png under plots
+
+        Parameters:
+            symbol (string): Symbol of the security to obtain as dataframe
+                             (e.g. "^SPX" for "S&P 500 - U.S.")
+            savepath (string): Path where figure will be saved
+
+        Returns:
+            Saves a figure symbol.png
+        """
+        # Get security name
+        security = db_session.query(Security).filter_by(symbol=symbol).one()
+
+        security_df = self.get_security_quotes_as_dataframe(symbol)
+
+        if not security_df.empty:
+            filename = savepath + symbol + ".png"
+
+            # Create figure
+            fig, ax1 = plt.subplots(figsize=(12, 4))
+
+            x = security_df["Date"]
+            y1 = security_df["adj_close"]
+            y2 = security_df["Volume"]
+
+            plt.title(security.name + " (" + security.type + ")")
+
+            plt.ylabel("Adj. close (1 / stock)")
+            ax2 = ax1.twinx()
+            ax1.plot(x, y1, ',-', alpha=0.9)
+
+            ax2.plot(x, y2, ',-', color=(1, 0, 0), alpha=0.5)
+            plt.ylabel("Trade volume (1 / day)")
+
+            # Create folder if not exists
+            if not os.path.exists(os.path.dirname(filename)):
+                try:
+                    os.makedirs(os.path.dirname(filename))
+                except OSError as exc:  # Guard against race condition
+                    if exc.errno != errno.EEXIST:
+                        raise
+
+            # Save figure
+            plt.savefig(filename, dpi = 600)
+            print("Saved %s" % (filename))
 
     def get_stooq_data(self, symbol):
         """ Returns stooq temporal stock data for a given symbol
