@@ -2,12 +2,7 @@ import database as db
 
 
 class Security(db.Base):
-    """ Class to store index data
-    Parameters:
-        name (string): name of index
-        symbol (string): unique symbol
-        start_date (datetime.date): start date of index
-        last_date (datetime.date): last available date of index
+    """ Class of an index data object
     """
     __tablename__ = 'security'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -22,6 +17,8 @@ class Security(db.Base):
 
 
 class Exchange(db.Base):
+    """ Class of an exchange data object
+    """
 
     __tablename__ = 'exchange'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -32,6 +29,8 @@ class Exchange(db.Base):
 
 
 class DataVendor(db.Base):
+    """ Class of an datavendor object (e.g. Yahoo)
+    """
 
     __tablename__ = 'datavendor'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -45,6 +44,8 @@ class DataVendor(db.Base):
 
 
 class Quotation(db.Base):
+    """ Class of a quotation object (security [e.g. stock or index] information on a given date)
+    """
 
     __tablename__ = 'quotations'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -60,7 +61,7 @@ class Quotation(db.Base):
     data_vendor_id = db.Column(db.Integer, db.ForeignKey('datavendor.id'))
     data_vendor = db.relationship('DataVendor', backref='datavendor')
     security_id = db.Column(db.Integer, db.ForeignKey('security.id'))
-    Security = db.relationship('Security', backref='security')
+    security = db.relationship('Security', backref='security')
 
     def __repr__(self):
         return (str(self.date) + ": " + str(self.adj_close) +
