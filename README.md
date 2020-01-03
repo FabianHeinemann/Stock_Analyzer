@@ -10,7 +10,7 @@ Tasks:
 
 -[x]Read data for all of Daniels indexes
 
---[]Error handling of wrong index strings
+--[ ]Error handling of wrong index strings
 
 -[x]Write data into db for test time span
 
