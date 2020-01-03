@@ -1,3 +1,0 @@
-Rename "security" to asset
-Underscore notation in all functions
-Google docstring
