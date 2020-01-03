@@ -1,18 +1,18 @@
 # Stock_Analyzer
 
-#### Read historic stock price data
 Tasks:
 
--~~TODO~~Find source of historic index data
+*Read historic stock price data*
 
--~~TODO~~ Find source of historic index data
+-[x]Find source of historic index data
+-[x]Find source of historic index data
+-[x]Read data for all of Daniels indexes
+-[x]Write data into db for test time span
+-[ ]Write data into db for longest available time span
 
--~~TODO~~ Read data for all of Daniels indexes
+*Visualize stock charts*
 
--~~TODO~~ Write data into db for test time span
+-[ ] Function to plot chosen security
 
--TODO: Write data into db for longest available time span
-
-#### Visualize stock charts
-#### Write functions to obtain empirical stock indicators
-#### Run accurate test using above empirical stock indicators using historic data
+*Write functions to obtain empirical stock indicators*
+*Run accurate test using above empirical stock indicators using historic data*
