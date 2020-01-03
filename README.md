@@ -5,9 +5,9 @@
 - [x] Find source of historic index data
 - [x] Find source of historic index data
 - [x] Read data for all of Daniels indexes
-- [x] Write data into db for test time span
-- [ ] Write data into db for longest available time span
-- [ ] Error handling of wrong indexes etc
+- [x] Write data into db for *test* time span
+- [ ] Write data into db for *longest available* time span
+- [ ] Error handling of wrong security symbols
 
 **Visualize stock charts**
 
