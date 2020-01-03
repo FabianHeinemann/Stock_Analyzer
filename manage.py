@@ -36,7 +36,7 @@ def add_securities(csvfile):
 
 
 @manager.command
-def listallsecurities():
+def list_all_securities():
     """ lists all saved db securities"""
     securities = db_session.query(Security).all()
     for s in securities:
@@ -44,7 +44,7 @@ def listallsecurities():
 
 
 @manager.command
-def listalldatavendors():
+def list_all_datavendors():
     """ lists all saved datavendors"""
     datavendors = db_session.query(DataVendor).all()
     for d in datavendors:
@@ -52,29 +52,27 @@ def listalldatavendors():
 
 
 @manager.command
-def listpricessecurity(security):
+def list_prices_security(symbol):
     """ lists all saved quotes by symbol"""
-    security = db_session.query(Security).filter_by(symbol=security).one()
+    security = db_session.query(Security).filter_by(symbol=symbol).one()
     if security is not None:
         quotations = db_session.query(Quotation).filter_by(security_id=
                                                        security.id).all()
         for quotation in quotations:
             print(quotation)
-
-
     else:
-        print("Security " + security + " does not exist in db")
-        
+        print("Security " + symbol + " does not exist in db")
+
 
 @manager.command
-def updateprice(symbol, datavendor="Yahoo"):
+def update_price(symbol, datavendor="Yahoo"):
     """update prices for one Security
         Default start_date: 2000/01/01"""
     dc.update_quotation(symbol, datavendor)
 
 
 @manager.command
-def updatepriceall(datavendor="Yahoo"):
+def update_price_all(datavendor="Yahoo"):
     """update prices for all securities found in table 'security'
         Default start_date: 2000/01/01"""
     securities = db_session.query(Security).all()
@@ -86,6 +84,14 @@ def updatepriceall(datavendor="Yahoo"):
 def show_quotations_symbol(symbol):
     pass
 
+@manager.command
+def plot_symbol(symbol):
+    # Get data for security
+
+    # Generate plot
+
+    # Save png in folder ./plots/
+    pass
 
 if __name__ == '__main__':
     manager.main()
