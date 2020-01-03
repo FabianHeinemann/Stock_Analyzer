@@ -2,6 +2,7 @@ from manager import Manager
 from util import DataController
 from model import Security, Exchange, DataVendor, Quotation
 from database import db_session, db_engine, Base
+import datetime
 
 manager = Manager()
 
@@ -67,18 +68,36 @@ def list_prices(symbol):
 
 
 @manager.command
-def update_price(symbol, datavendor="Yahoo"):
-    """Update prices for the security given as argument <symbol>. Default start_date: 2000/01/01"""
+def read_quote(symbol, datavendor="Yahoo"):
+    """Update quotes for the security given as argument <symbol>. Default start_date: 2000/01/01"""
     dc.update_quotation(symbol, datavendor)
 
+@manager.command
+def update_quote(symbol, datavendor="Yahoo"):
+    """Update quotes for the security given as argument <symbol>. Latest missing dates are updated"""
+    latest_date = dc.get_latest_update(symbol)
+    if latest_date > datetime.datetime.now():
+        dc.update_quotation(symbol, datavendor, latest_date + datetime.timedelta(days=1))
 
 @manager.command
-def update_price_all(datavendor="Yahoo"):
-    """Update prices for all securities found in table 'security', argument <symbol>. Default start_date: 2000/01/01"""
+def read_all_quotes(datavendor="Yahoo"):
+    """Update quotes for all securities found in table 'security', argument <symbol>. Default start_date: 2000/01/01"""
     securities = db_session.query(Security).all()
     for s in securities:
         dc.update_quotation(s.symbol, datavendor)
+    else:
+        print("Security %s already up-to date" % (s.symbol))
 
+@manager.command
+def update_all_quotes(datavendor="Yahoo"):
+    """Update quotes for all securities found in table 'security', argument <symbol>. Latest missing dates are updated"""
+    securities = db_session.query(Security).all()
+    for s in securities:
+        latest_date = dc.get_latest_update(s.symbol)
+        if latest_date > datetime.datetime.now():
+            dc.update_quotation(s.symbol, datavendor, latest_date + datetime.timedelta(days=1))
+        else:
+            print("Security %s already up-to date" % (s.symbol))
 
 @manager.command
 def plot(symbol):

@@ -8,6 +8,7 @@ from model import DataVendor, Security, Exchange, Quotation
 import matplotlib.pyplot as plt
 import os
 from pandas.plotting import register_matplotlib_converters
+from sqlalchemy import desc
 from tqdm import tqdm
 import errno
 register_matplotlib_converters()
@@ -54,9 +55,19 @@ class DataController:
                        data_vendor_id=datavendor.id,
                        security_id=security.id))
 
-    def update_quotation(self, symbol, datavendor):
-        start_date = datetime.date(2000, 1, 1)
-        end_date = datetime.datetime.now()
+    def update_quotation(self, symbol, datavendor, start_date=datetime.date(2000, 1, 1), end_date=datetime.datetime.now()):
+        """ Read quotation from datavendor and save to database
+
+                Parameters:
+                    symbol (string): Symbol of the security to obtain as dataframe
+                                     (e.g. "^SPX" for "S&P 500 - U.S.")
+                    datavendor (string): datavendor to use
+                    start_date: Start date of data reading and writing
+                    end_date: End date of data reading and writing
+
+                Returns:
+                    stores data to database
+                """
         if datavendor == "Yahoo":
             print("Current security:%s" % (symbol))
             dv = db_session.query(DataVendor).filter_by(name=datavendor).one()
@@ -69,7 +80,7 @@ class DataController:
             if not yahoo_data.empty:
                 # Create new index object
 
-                print("Add quotes to db")
+                print("Add quotes to db from %s to %s" % (start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")))
                 for index, quotation in yahoo_data.iterrows():
                     # print(quotation)
                     self.add_quotation(date=index,
@@ -118,6 +129,25 @@ class DataController:
 
         return security_df
 
+    def get_latest_update(self, symbol):
+        """ Get time of latest update for given security
+
+                Parameters:
+                    symbol (string): Symbol of the security to obtain as dataframe
+                                     (e.g. "^SPX" for "S&P 500 - U.S.")
+
+                Returns:
+                    date of last update (datetime). None on error.
+                """
+        last_update = None
+
+        security = db_session.query(Security).filter_by(symbol=symbol).one()
+        if security is not None:
+            quotation = db_session.query(Quotation).filter_by(security_id=security.id).order_by(desc(Quotation.date)).first()
+            last_update = quotation.date
+
+        return last_update
+
     def plot_security(self, symbol, savepath="./plots/"):
         """ Plot security quotes and save as png under plots
 
@@ -129,6 +159,7 @@ class DataController:
         Returns:
             Saves a figure symbol.png
         """
+
         # Get security name
         security = db_session.query(Security).filter_by(symbol=symbol).one()
 
