@@ -62,23 +62,22 @@ class DataController:
             yf.pdr_override()
             yahoo_data = web.get_data_yahoo(symbol, start=start_date,
                                             end=end_date)
-            yahoo_data.head()
             if not yahoo_data.empty:
                 # Create new index object
                 print("begin quotes")
-                for d in yahoo_data.itertuples():
-                    print(d)
-                    self.addQuotation(date=d.Index,
-                                      open=d.Open,
-                                      high=d.High,
-                                      low=d.Low,
-                                      close=d.Close,
-                                      adj_close=d._5,
-                                      volume=d.Volume,
-                                      created_date=end_date,
-                                      last_updated=end_date,
-                                      datavendor=dv,
-                                      security=sec)
+                for index, quotation in yahoo_data.iterrows():
+                    print(quotation)
+                    self.addQuotation(date=index,
+                                       open=quotation["Open"],
+                                       high=quotation["High"],
+                                       low=quotation["Low"],
+                                       close=quotation["Close"],
+                                       adj_close=quotation["Adj Close"],
+                                       volume=quotation["Volume"],
+                                       created_date=end_date,
+                                       last_updated=end_date,
+                                       datavendor=dv,
+                                       security=sec)
                 db_session.commit()
             else:
                 print("Read error.")
