@@ -74,12 +74,12 @@ def updateprice(symbol, datavendor="Yahoo"):
 
 
 @manager.command
-def updatepriceall(symbol, datavendor="Yahoo"):
-    """update prices for all Security
+def updatepriceall(datavendor="Yahoo"):
+    """update prices for all securities found in table 'security'
         Default start_date: 2000/01/01"""
     securities = db_session.query(Security).all()
     for s in securities:
-        dc.update_quotation(symbol, datavendor)
+        dc.update_quotation(s.symbol, datavendor)
 
 
 @manager.command
