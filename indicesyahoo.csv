@@ -1,36 +1,36 @@
 Symbol;Name;Type
-^GSPC; S&P 500;Index
-^DJI; Dow 30;Index
-^IXIC; Nasdaq;Index
-^NYA; NYSE COMPOSITE (DJ);Index
-^XAX; NYSE AMEX COMPOSITE INDEX;Index
-^BUK100P; Cboe UK 100 Price Return;Index
-^RUT; Russell 2000;Index
-^VIX; Vix;Index
-^FTSE; FTSE 100;Index
-^GDAXI; DAX PERFORMANCE-INDEX;Index
-^FCHI; CAC 40;Index
-^STOXX50E; ESTX 50 PR.EUR;Index
-^N100; EURONEXT 100;Index
-^BFX; BEL 20;Index
-IMOEX.ME; MOEX Russia Index;Index
-^N225; Nikkei 225;Index
-^HSI; HANG SENG INDEX;Index
-000001.SS; SSE Composite Index;Index
-^STI; STI Index;Index
-^AXJO; S&P/ASX 200;Index
-^AORD; ALL ORDINARIES;Index
-^BSESN; S&P BSE SENSEX;Index
-^JKSE; Jakarta Composite Index;Index
-^KLSE; FTSE Bursa Malaysia KLCI;Index
-^NZ50; S&P/NZX 50 INDEX GROSS;Index
-^KS11; KOSPI Composite Index;Index
-^TWII; TSEC weighted index;Index
-^GSPTSE; S&P/TSX Composite index;Index
-^BVSP; IBOVESPA;Index
-^MXX; IPC MEXICO;Index
-^IPSA; S&P/CLX IPSA;Index
-^MERV; MERVAL;Index
-^TA125.TA; TA-125;Index
-^CASE30; EGX 30 Price Return Index;Index
-^JN0U.JO; Top 40 USD Net TRI Index;Index
+^GSPC;S&P 500;Index
+^DJI;Dow 30;Index
+^IXIC;Nasdaq;Index
+^NYA;NYSE COMPOSITE (DJ);Index
+^XAX;NYSE AMEX COMPOSITE INDEX;Index
+^BUK100P;Cboe UK 100 Price Return;Index
+^RUT;Russell 2000;Index
+^VIX;Vix;Index
+^FTSE;FTSE 100;Index
+^GDAXI;DAX PERFORMANCE-INDEX;Index
+^FCHI;CAC 40;Index
+^STOXX50E;ESTX 50 PR.EUR;Index
+^N100;EURONEXT 100;Index
+^BFX;BEL 20;Index
+IMOEX.ME;MOEX Russia Index;Index
+^N225;Nikkei 225;Index
+^HSI;HANG SENG INDEX;Index
+000001.SS;SSE Composite Index;Index
+^STI;STI Index;Index
+^AXJO;S&P/ASX 200;Index
+^AORD;ALL ORDINARIES;Index
+^BSESN;S&P BSE SENSEX;Index
+^JKSE;Jakarta Composite Index;Index
+^KLSE;FTSE Bursa Malaysia KLCI;Index
+^NZ50;S&P/NZX 50 INDEX GROSS;Index
+^KS11;KOSPI Composite Index;Index
+^TWII;TSEC weighted index;Index
+^GSPTSE;S&P/TSX Composite index;Index
+^BVSP;IBOVESPA;Index
+^MXX;IPC MEXICO;Index
+^IPSA;S&P/CLX IPSA;Index
+^MERV;MERVAL;Index
+^TA125.TA;TA-125;Index
+^CASE30;EGX 30 Price Return Index;Index
+^JN0U.JO;Top 40 USD Net TRI Index;Index

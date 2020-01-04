@@ -25,6 +25,7 @@ class DataController:
         pass
 
     def add_data_vendor(self, name=None, website=None):
+        """ Add security (e.g. a stock or an index) to table security """
         date = datetime.datetime.now()
         datavendor = DataVendor(name=name, website=website, created_date=date,
                                 last_updated=date)
@@ -32,6 +33,7 @@ class DataController:
         db_session.commit()
 
     def add_security(self, name, type, symbol):
+        """ Add security (e.g. a stock or an index) to table security """
         date = datetime.datetime.now()
         security = Security(name=name, type=type, symbol=symbol,
                             created_date=date, last_updated=date)
@@ -39,7 +41,16 @@ class DataController:
         db_session.commit()
 
     def add_security_from_csv(self, csvfile):
-        # read from csv file
+        """ Read available securities from csv file
+
+            Expected order of columns: name; type; symbol
+            Example: ^DJI;Dow 30;Index
+
+            Parameters:
+                csvfile (string): Filename of csv file
+            Returns:
+                -
+        """
         print("Read from csv: %s" % (csvfile))
         securities = pd.read_csv(csvfile, sep=';')
         print("Processing entries...")
@@ -49,6 +60,25 @@ class DataController:
 
     def add_quotation(self, date, open, high, low, close, adj_close, volume,
                       created_date, last_updated, datavendor, security):
+        """ Add quotation to the database table <quotations>.
+            This table contains the time series data of security prices.
+
+            Parameters:
+                date (sqlalchemy.types.DateTime): Date of quote
+                open (sqlalchemy.types.Numeric): Opening price
+                high (sqlalchemy.types.Numeric): Highest price
+                low (sqlalchemy.types.Numeric): Lowest price
+                close (sqlalchemy.types.Numeric): Closing price
+                adj_close (sqlalchemy.types.Numeric): Adjusted closing price
+                volume (sqlalchemy.types.Numeric): Volume
+                created_date (sqlalchemy.types.DateTime): Creation of entry
+                last_updated (sqlalchemy.types.DateTime): Last update of entry
+                datavendor (DataVendor): Datavendor object
+                security (Security): Security object
+
+            Returns:
+                -
+        """
 
         db_session.add(Quotation(date=date, open=open, high=high, low=low,
                        close=close, adj_close=adj_close, volume=volume,
@@ -58,14 +88,14 @@ class DataController:
                        security_id=security.id))
 
     def update_quotation(self, symbol, datavendor, start_date=DATE_ZERO, end_date=datetime.datetime.now()):
-        """ Read quotation from datavendor and save to database
+        """ Read quotation from datavendor and save to database table <quotations>
 
                 Parameters:
                     symbol (string): Symbol of the security to obtain as dataframe
                                      (e.g. "^SPX" for "S&P 500 - U.S.")
-                    datavendor (string): datavendor to use
-                    start_date: Start date of data reading and writing
-                    end_date: End date of data reading and writing
+                    datavendor (string): datavendor (e.g. Yahoo) to use
+                    start_date (datetime): Start date of data reading and writing
+                    end_date (datetime): End date of data reading and writing
 
                 Returns:
                     stores data to database
@@ -201,24 +231,3 @@ class DataController:
             # Save figure
             plt.savefig(filename, dpi = 600)
             print("Saved %s" % (filename))
-
-    def get_stooq_data(self, symbol):
-        """ Returns stooq temporal stock data for a given symbol
-            https://stooq.pl/
-            Times are defined by self.start_date and self.end_date
-
-        Parameters:
-            symbol (str): Symbol (e.g. "^SPX" for "S&P 500 - U.S.")
-
-        Returns:
-            Pandas Dataframe: Table of results
-       """
-        return StooqDailyReader(
-            symbols=symbol,
-            start=self.start_date,
-            end=self.end_date,
-            chunksize=25,
-            retry_count=3,
-            pause=0.1,
-            session=self.session
-        ).read()

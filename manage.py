@@ -89,6 +89,7 @@ def update_all_quotes(datavendor="Yahoo"):
         else:
             print("Security %s already up-to date, last update was: %s" % (symbol, latest_date.strftime("%Y-%m-%d")))
 
+
 @manager.command
 def plot(symbol):
     """Creates a plot for given security, argument <symbol> (i.e. an index)"""
