@@ -1,6 +1,5 @@
 import database as db
 
-
 class Security(db.Base):
     """ Class of an index data object
     """

@@ -14,6 +14,8 @@ import errno
 register_matplotlib_converters()
 plt.rcParams.update({'figure.max_open_warning': 0})
 
+# Oldest date which is used to query data
+DATE_ZERO = datetime.date(1990,1,1)
 
 class DataController:
     """ Class to control data import from different
@@ -55,7 +57,7 @@ class DataController:
                        data_vendor_id=datavendor.id,
                        security_id=security.id))
 
-    def update_quotation(self, symbol, datavendor, start_date=datetime.date(2000, 1, 1), end_date=datetime.datetime.now()):
+    def update_quotation(self, symbol, datavendor, start_date=DATE_ZERO, end_date=datetime.datetime.now()):
         """ Read quotation from datavendor and save to database
 
                 Parameters:
@@ -137,14 +139,18 @@ class DataController:
                                      (e.g. "^SPX" for "S&P 500 - U.S.")
 
                 Returns:
-                    date of last update (datetime). None on error.
+                    date of last update (datetime.date()). Will return DATE_ZERO in case of empty db.
                 """
-        last_update = None
 
         security = db_session.query(Security).filter_by(symbol=symbol).one()
         if security is not None:
+            # Get date of latest entry
             quotation = db_session.query(Quotation).filter_by(security_id=security.id).order_by(desc(Quotation.date)).first()
-            last_update = quotation.date
+
+            if quotation is not None:
+                last_update = quotation.date.date()
+            else:
+                last_update = DATE_ZERO
 
         return last_update
 
