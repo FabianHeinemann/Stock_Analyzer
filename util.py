@@ -1,6 +1,5 @@
 import pandas as pd
 import pandas_datareader.data as web
-from pandas_datareader.stooq import StooqDailyReader
 import yfinance as yf
 import datetime
 from database import db_session
@@ -9,7 +8,6 @@ import matplotlib.pyplot as plt
 import os
 from pandas.plotting import register_matplotlib_converters
 from sqlalchemy import desc
-from tqdm import tqdm
 import errno
 register_matplotlib_converters()
 plt.rcParams.update({'figure.max_open_warning': 0})
