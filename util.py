@@ -8,9 +8,15 @@ import matplotlib.pyplot as plt
 import os
 from pandas.plotting import register_matplotlib_converters
 from sqlalchemy import desc
+from sqlalchemy.exc import SAWarning
 import errno
+import warnings
 register_matplotlib_converters()
 plt.rcParams.update({'figure.max_open_warning': 0})
+
+# Ignore warning about decimals
+# https://stackoverflow.com/questions/34674029/sqlalchemy-query-raises-unnecessary-warning-about-sqlite-and-decimal-how-to-spe
+warnings.filterwarnings('ignore', r".*support Decimal objects natively", SAWarning, r'^sqlalchemy\.sql\.sqltypes$')
 
 # Oldest date which is used to query data
 DATE_ZERO = datetime.date(1970,1,1)
