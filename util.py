@@ -197,7 +197,12 @@ class DataController:
         # Get security name
         security = db_session.query(Security).filter_by(symbol=symbol).one()
 
+        # Dataframe of security
         security_df = self.get_security_quotes_as_dataframe(symbol)
+
+        # Get rolling average of security
+        security_df["adj_close_30_days_average"] = security_df["adj_close"].rolling(window=30).mean()
+        security_df["adj_close_100_days_average"] = security_df["adj_close"].rolling(window=100).mean()
 
         if not security_df.empty:
             filename = savepath + symbol + ".png"
@@ -208,15 +213,21 @@ class DataController:
             x = security_df["Date"]
             y1 = security_df["adj_close"]
             y2 = security_df["Volume"]
+            #y3 = security_df["adj_close_30_days_average"]
+            y4 = security_df["adj_close_100_days_average"]
 
             plt.title(security.name + " (" + security.type + ")")
 
             plt.ylabel("Adj. close (1 / stock)")
             ax2 = ax1.twinx()
-            ax1.plot(x, y1, ',-', alpha=0.9)
+            #ax1.plot(x, y3, '-', alpha=0.7, color=(0,1,0))
+            ax1.plot(x, y4, '-', alpha=0.7, color=(0, 0, 1), label="100 days average")
+            ax1.plot(x, y1, ',-', alpha=0.9, color=(0, 0, 0), label=security.name)
 
-            ax2.plot(x, y2, ',-', color=(1, 0, 0), alpha=0.5)
+            ax2.plot(x, y2, ',-', color=(1, 0, 0), alpha=0.7)
             plt.ylabel("Trade volume (1 / day)")
+
+            ax1.legend(loc = 'best', frameon=False)
 
             # Create folder if not exists
             if not os.path.exists(os.path.dirname(filename)):
