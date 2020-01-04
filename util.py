@@ -13,7 +13,7 @@ register_matplotlib_converters()
 plt.rcParams.update({'figure.max_open_warning': 0})
 
 # Oldest date which is used to query data
-DATE_ZERO = datetime.date(1990,1,1)
+DATE_ZERO = datetime.date(1970,1,1)
 
 class DataController:
     """ Class to control data import from different
@@ -201,8 +201,14 @@ class DataController:
         security_df = self.get_security_quotes_as_dataframe(symbol)
 
         # Get rolling average of security
-        security_df["adj_close_30_days_average"] = security_df["adj_close"].rolling(window=30).mean()
         security_df["adj_close_100_days_average"] = security_df["adj_close"].rolling(window=100).mean()
+
+        # Get rolling standard deviation of security
+        security_df["adj_close_100_days_std"] = security_df["adj_close"].rolling(window=100).std()
+
+        # 95% confidence interval of stock, i.e. +/- 2*standard deviation (only true if chart is Gaussian distributed)
+        security_df["adj_close_high"] = security_df["adj_close"].astype("float32") + 2*security_df["adj_close_100_days_std"]
+        security_df["adj_close_low"] = security_df["adj_close"].astype("float32") - 2*security_df["adj_close_100_days_std"]
 
         if not security_df.empty:
             filename = savepath + symbol + ".png"
@@ -212,20 +218,23 @@ class DataController:
 
             x = security_df["Date"]
             y1 = security_df["adj_close"]
+
+            y1_upper_CI = security_df["adj_close_high"]
+            y1_lower_CI = security_df["adj_close_low"]
+
             y2 = security_df["Volume"]
-            #y3 = security_df["adj_close_30_days_average"]
-            y4 = security_df["adj_close_100_days_average"]
+            y3 = security_df["adj_close_100_days_average"]
 
             plt.title(security.name + " (" + security.type + ")")
 
             plt.ylabel("Adj. close (1 / stock)")
-            ax2 = ax1.twinx()
-            #ax1.plot(x, y3, '-', alpha=0.7, color=(0,1,0))
-            ax1.plot(x, y4, '-', alpha=0.7, color=(0, 0, 1), label="100 days average")
-            ax1.plot(x, y1, ',-', alpha=0.9, color=(0, 0, 0), label=security.name)
+            #ax2 = ax1.twinx()
+            ax1.plot(x, y3, '-', alpha=0.7, color=(0, 0, 1), label="100 days average")
+            ax1.plot(x, y1, ',-', alpha=0.9, color=(0, 0, .2), label=security.name + u"\u00B1" + "95% CI")
+            ax1.fill_between(x, y1_lower_CI, y1_upper_CI, color=(0.2,0.3,0.4), alpha=.1)
 
-            ax2.plot(x, y2, ',-', color=(1, 0, 0), alpha=0.7)
-            plt.ylabel("Trade volume (1 / day)")
+            #ax2.plot(x, y2, ',-', color=(1, 0, 0), alpha=0.45)
+            #plt.ylabel("Trade volume (1 / day)")
 
             ax1.legend(loc = 'best', frameon=False)
 
