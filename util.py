@@ -203,8 +203,8 @@ class DataController:
         # Get rolling average of security
         security_df["adj_close_100_days_average"] = security_df["adj_close"].rolling(window=100).mean()
 
-        # Get rolling standard deviation of security using the last 10 days
-        security_df["adj_close_100_days_std"] = security_df["adj_close"].rolling(window=10).std()
+        # Get rolling standard deviation of security using the last 15 days
+        security_df["adj_close_100_days_std"] = security_df["adj_close"].rolling(window=15).std()
 
         # 95% confidence interval of stock, i.e. +/- 2*standard deviation (only true if chart is Gaussian distributed)
         security_df["adj_close_high"] = security_df["adj_close"].astype("float32") + 2*security_df["adj_close_100_days_std"]
