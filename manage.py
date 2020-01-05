@@ -22,6 +22,7 @@ def init_db():
     """Inits the sqlite-database"""
     add_data_vendor("Yahoo", "www.yahoo.com")
     add_securities("indicesyahoo.csv")
+    add_securities("stocks.csv")
 
 
 @manager.command

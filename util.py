@@ -8,9 +8,15 @@ import matplotlib.pyplot as plt
 import os
 from pandas.plotting import register_matplotlib_converters
 from sqlalchemy import desc
+from sqlalchemy.exc import SAWarning
 import errno
+import warnings
 register_matplotlib_converters()
 plt.rcParams.update({'figure.max_open_warning': 0})
+
+# Ignore warning about decimals
+# https://stackoverflow.com/questions/34674029/sqlalchemy-query-raises-unnecessary-warning-about-sqlite-and-decimal-how-to-spe
+warnings.filterwarnings('ignore', r".*support Decimal objects natively", SAWarning, r'^sqlalchemy\.sql\.sqltypes$')
 
 # Oldest date which is used to query data
 DATE_ZERO = datetime.date(1970,1,1)
@@ -27,16 +33,21 @@ class DataController:
         date = datetime.datetime.now()
         datavendor = DataVendor(name=name, website=website, created_date=date,
                                 last_updated=date)
-        db_session.add(datavendor)
-        db_session.commit()
+        # Only add datavendor if not an entry with than name exists
+        if db_session.query(DataVendor).filter_by(name=name).first() is None:
+            db_session.add(datavendor)
+            db_session.commit()
 
     def add_security(self, name, type, symbol):
         """ Add security (e.g. a stock or an index) to table security """
         date = datetime.datetime.now()
         security = Security(name=name, type=type, symbol=symbol,
                             created_date=date, last_updated=date)
-        db_session.add(security)
-        db_session.commit()
+
+        # Only add security if not exists
+        if db_session.query(Security).filter_by(symbol=symbol).first() is None:
+            db_session.add(security)
+            db_session.commit()
 
     def add_security_from_csv(self, csvfile):
         """ Read available securities from csv file

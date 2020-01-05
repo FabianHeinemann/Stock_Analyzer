@@ -3,7 +3,8 @@ from database import db_engine
 import pandas as pd
 
 class Security(db.Base):
-    """ Class of an index data object
+    """ Class of a security data object (i.e. a general financial object
+        such as an index or stock)
     """
     __tablename__ = 'security'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
