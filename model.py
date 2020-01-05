@@ -1,6 +1,7 @@
 import database as db
-from database import db_engine
+from database import db_engine, db_session
 import pandas as pd
+import sqlalchemy as sa
 
 class Security(db.Base):
     """ Class of a security data object (i.e. a general financial object
@@ -13,7 +14,6 @@ class Security(db.Base):
     symbol = db.Column(db.String)
     created_date = db.Column(db.DateTime)
     last_updated = db.Column(db.DateTime)
-
 
     def __repr__(self):
         return (str(self.name) + ": " + str(self.symbol) + " (" + str(self.type) + ")")
@@ -66,11 +66,29 @@ class Quotation(db.Base):
     security_id = db.Column(db.Integer, db.ForeignKey('security.id'))
     security = db.relationship('Security', backref='security')
 
+    @classmethod
+    def get_dataframe(cls, symbol):
+        """ Get Pandas Dataframe of quotations for given symbol
+        Args:
+            symbol (string): Symbol of security (e.g. "^DJI")
+        returns:
+            Panadas dataframe
+
+            None in case of error
+        """
+
+        return_df = None
+
+        # Get security object for given symbol
+        security = db_session.query(Security).filter_by(symbol=symbol).first()
+
+        if security is not None:
+            # Get quotation data for symbol as dataframe
+            t = sa.Table(cls.__tablename__, sa.MetaData(), autoload_with=db_engine)
+            return_df = pd.read_sql(t.select().where(t.c.security_id == security.id), db_engine)
+
+        return return_df
+
     def __repr__(self):
         return (str(self.date) + ": " + str(self.adj_close) +
                 "(" + str(self.volume) + ")")
-
-
-def get_securities_by_type(type):
-    return (pd.read_sql("security", con=db_engine))
-

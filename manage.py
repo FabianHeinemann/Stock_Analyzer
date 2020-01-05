@@ -116,6 +116,11 @@ def test_strategy():
 def get_securities_pd():
     print(model.get_securities_by_type("index"))
 
+@manager.command
+def test():
+    if Quotation.get_dataframe("^DJI") is not None:
+        print(Quotation.get_dataframe("^DJI"))
+
 
 if __name__ == '__main__':
     manager.main()

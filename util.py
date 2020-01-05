@@ -139,37 +139,6 @@ class DataController:
             else:
                 print("Read error.")
 
-    def get_security_quotes_as_dataframe(self, symbol):
-        """ Get a security quotes as a dataframe
-
-        Parameters:
-            symbol (string): Symbol of the security to obtain as dataframe
-                             (e.g. "^SPX" for "S&P 500 - U.S.")
-        Returns:
-            Pandas Dataframe: Table of results (empty on error)
-        """
-
-        # Get security object
-        security = db_session.query(Security).filter_by(symbol=symbol).one()
-
-        # Return object
-        security_df = pd.DataFrame()
-        if security is not None:
-            # Get security data as dataframe
-            quotations = db_session.query(Quotation).filter_by(security_id=security.id).all()
-
-            date_list = []
-            adj_close_list = []
-            volume_list = []
-            for quotation in quotations:
-                date_list.append(quotation.date)
-                adj_close_list.append(quotation.adj_close)
-                volume_list.append(quotation.volume)
-
-            security_df = pd.DataFrame({"Date": date_list, "adj_close": adj_close_list, "Volume": volume_list})
-
-        return security_df
-
     def get_latest_update(self, symbol):
         """ Get time of latest update for given security
 
@@ -209,7 +178,7 @@ class DataController:
         security = db_session.query(Security).filter_by(symbol=symbol).one()
 
         # Dataframe of security
-        security_df = self.get_security_quotes_as_dataframe(symbol)
+        security_df = Quotation.get_dataframe(symbol)
 
         # Get rolling average of security
         security_df["adj_close_100_days_average"] = security_df["adj_close"].rolling(window=100).mean()
@@ -227,13 +196,13 @@ class DataController:
             # Create figure
             fig, ax1 = plt.subplots(figsize=(12, 4))
 
-            x = security_df["Date"]
+            x = security_df["date"]
             y1 = security_df["adj_close"]
 
             y1_upper_CI = security_df["adj_close_high"]
             y1_lower_CI = security_df["adj_close_low"]
 
-            y2 = security_df["Volume"]
+            y2 = security_df["volume"]
             y3 = security_df["adj_close_100_days_average"]
 
             plt.title(security.name + " (" + security.type + ")")
