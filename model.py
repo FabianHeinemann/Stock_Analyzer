@@ -71,8 +71,9 @@ class Quotation(db.Base):
         """ Get Pandas Dataframe of quotations for given symbol
         Args:
             symbol (string): Symbol of security (e.g. "^DJI")
-        returns:
-            Panadas dataframe
+
+        Returns:
+            Panadas dataframe with quotation data
 
             None in case of error
         """
