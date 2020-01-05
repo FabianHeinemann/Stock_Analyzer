@@ -1,5 +1,6 @@
 from manager import Manager
 from util import DataController
+import model as model
 from model import Security, Exchange, DataVendor, Quotation
 from database import db_session, db_engine, Base
 from datetime import datetime, timedelta, date
@@ -102,6 +103,17 @@ def plot_all():
     securities = db_session.query(Security).all()
     for s in securities:
         dc.plot_security(s.symbol)
+
+@manager.command
+def test_strategy():
+    """Creates a simple test over all indices"""
+    indices = db_session.query(Security).filter_by(type="Index").all()
+    dc.join_dataframes(indices)
+
+
+@manager.command
+def get_securities_pd():
+    print(model.get_securities_by_type("index"))
 
 
 if __name__ == '__main__':
