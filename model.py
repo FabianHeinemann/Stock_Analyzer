@@ -1,4 +1,6 @@
 import database as db
+from database import db_engine
+import pandas as pd
 
 class Security(db.Base):
     """ Class of an index data object
@@ -10,6 +12,7 @@ class Security(db.Base):
     symbol = db.Column(db.String)
     created_date = db.Column(db.DateTime)
     last_updated = db.Column(db.DateTime)
+
 
     def __repr__(self):
         return (str(self.name) + ": " + str(self.symbol) + " (" + str(self.type) + ")")
@@ -65,3 +68,8 @@ class Quotation(db.Base):
     def __repr__(self):
         return (str(self.date) + ": " + str(self.adj_close) +
                 "(" + str(self.volume) + ")")
+
+
+def get_securities_by_type(type):
+    return (pd.read_sql("security", con=db_engine))
+
