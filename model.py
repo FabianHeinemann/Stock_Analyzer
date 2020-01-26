@@ -91,5 +91,4 @@ class Quotation(db.Base):
         return return_df
 
     def __repr__(self):
-        return (str(self.date) + ": " + str(self.adj_close) +
-                "(" + str(self.volume) + ")")
+        return (str(self.date) + ": " + str(self.adj_close) + "(" + str(self.volume) + ")" + " Created: " + str(self.created_date))

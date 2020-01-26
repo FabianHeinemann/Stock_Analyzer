@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import os
 from pandas.plotting import register_matplotlib_converters
 from sqlalchemy import desc
-from sqlalchemy.exc import SAWarning
+from sqlalchemy import exc
 import errno
 import warnings
 register_matplotlib_converters()
@@ -16,7 +16,7 @@ plt.rcParams.update({'figure.max_open_warning': 0})
 
 # Ignore warning about decimals
 # https://stackoverflow.com/questions/34674029/sqlalchemy-query-raises-unnecessary-warning-about-sqlite-and-decimal-how-to-spe
-warnings.filterwarnings('ignore', r".*support Decimal objects natively", SAWarning, r'^sqlalchemy\.sql\.sqltypes$')
+warnings.filterwarnings('ignore', r".*support Decimal objects natively", exc.SAWarning, r'^sqlalchemy\.sql\.sqltypes$')
 
 # Oldest date which is used to query data
 DATE_ZERO = datetime.date(1970,1,1)
@@ -89,12 +89,17 @@ class DataController:
                 -
         """
 
-        db_session.add(Quotation(date=date, open=open, high=high, low=low,
-                       close=close, adj_close=adj_close, volume=volume,
-                       created_date=created_date,
-                       last_updated=last_updated,
-                       data_vendor_id=datavendor.id,
-                       security_id=security.id))
+        try:
+            exists = db_session.query(Quotation).filter(Quotation.date==date, Security.id==security.id).first()
+            if not exists:
+                db_session.add(Quotation(date=date, open=open, high=high, low=low,
+                               close=close, adj_close=adj_close, volume=volume,
+                               created_date=created_date,
+                               last_updated=last_updated,
+                               data_vendor_id=datavendor.id,
+                               security_id=security.id))
+        except exc.SQLAlchemyError as e:
+            print("Encountered database error \"%s\"" % (str(e)))
 
     def update_quotation(self, symbol, datavendor, start_date=DATE_ZERO, end_date=datetime.datetime.now()):
         """ Read quotation from datavendor and save to database table <quotations>
@@ -123,7 +128,6 @@ class DataController:
 
                 print("Add quotes to db from %s to %s" % (start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")))
                 for index, quotation in yahoo_data.iterrows():
-                    # print(quotation)
                     self.add_quotation(date=index,
                                        open=quotation["Open"],
                                        high=quotation["High"],

@@ -4,6 +4,7 @@ import model as model
 from model import Security, Exchange, DataVendor, Quotation
 from database import db_session, db_engine, Base
 from datetime import datetime, timedelta, date
+from sqlalchemy import exc
 
 manager = Manager()
 
@@ -58,15 +59,18 @@ def list_all_datavendors():
 @manager.command
 def list_prices(symbol):
     """Lists saved quotes for security given as argument <symbol>."""
-
-    # Get Security object
-    security = db_session.query(Security).filter_by(symbol=symbol).one()
-    if security is not None:
-        quotations = db_session.query(Quotation).filter_by(security_id=security.id).all()
+    try:
+        # Get Security object
+        security = db_session.query(Security).filter_by(symbol=symbol).one()
+        if security is not None:
+            # Get quotations for security.id
+            quotations = db_session.query(Quotation).filter_by(security_id=security.id).all()
+    except exc.SQLAlchemyError as e:
+        print("Encountered database error \"%s\" for symbol %s" % (str(e), symbol))
+    else:
+        # Loop over quotations
         for quotation in quotations:
             print(quotation)
-    else:
-        print("Security " + symbol + " does not exist in db")
 
 
 @manager.command
@@ -106,21 +110,20 @@ def plot_all():
         dc.plot_security(s.symbol)
 
 @manager.command
-def test_strategy():
-    """Creates a simple test over all indices"""
-    indices = db_session.query(Security).filter_by(type="Index").all()
-    dc.join_dataframes(indices)
-
-
-@manager.command
-def get_securities_pd():
-    print(model.get_securities_by_type("index"))
-
-@manager.command
 def test():
-    if Quotation.get_dataframe("^DJI") is not None:
-        print(Quotation.get_dataframe("^DJI"))
-
+    symbol = "BPE5.DE"
+    try:
+        # Get Security object
+        security = db_session.query(Security).filter_by(symbol=symbol).one()
+        if security is not None:
+            # Get quotations for security.id
+            quotations = db_session.query(Quotation).filter_by(security_id=security.id).all()
+    except exc.SQLAlchemyError as e:
+        print("Encountered database error \"%s\" for symbol %s" % (str(e), symbol))
+    else:
+        # loop over quotations
+        for quotation in quotations:
+            print(quotation)
 
 if __name__ == '__main__':
     manager.main()
